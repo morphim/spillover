@@ -100,14 +100,14 @@ int main(int argc, char **argv)
     bind_addr1.address[1] = 168;
     bind_addr1.address[2] = 1;
     bind_addr1.address[3] = 153;
-    bind_addr1.port = 1000;
+    bind_addr1.port = 5000;
 
     bind_addr2.type = SPO_NET_SOCKET_TYPE_IPV4;
     bind_addr2.address[0] = 192;
     bind_addr2.address[1] = 168;
     bind_addr2.address[2] = 1;
     bind_addr2.address[3] = 153;
-    bind_addr2.port = 2000;
+    bind_addr2.port = 6000;
 
     callbacks.connected = connected;
     callbacks.unable_to_connect = unable_to_connect;
