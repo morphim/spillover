@@ -23,7 +23,7 @@ THE SOFTWARE.
 #ifdef WIN32
 #include <windows.h>
 #else
-#include <sys/time.h>
+#include <time.h>
 #endif
 
 #include "random.h"
@@ -42,9 +42,10 @@ static uint32_t spo_internal_get_seed()
     QueryPerformanceCounter(&time);
     return time.LowPart;
 #else /* we need to replace the next code to make it safer */
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return 1000000 * time.tv_sec + time.tv_usec;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+        return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    return 0;
 #endif
 }
 
