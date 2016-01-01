@@ -60,36 +60,36 @@ static uint32_t spo_internal_rand()
     else
         spo_rand_j = 54;
 
-	return spo_rand_x[spo_rand_j] += spo_rand_x[spo_rand_i];
+    return spo_rand_x[spo_rand_j] += spo_rand_x[spo_rand_i];
 }
 
 void spo_random_init()
 {
-	int i;
+    int i;
 
-	spo_rand_x[0] = 1;
-	spo_rand_x[1] = spo_internal_get_seed();
+    spo_rand_x[0] = 1;
+    spo_rand_x[1] = spo_internal_get_seed();
 
-	for (i = 2; i < 55; ++i)
-		spo_rand_x[i] = spo_rand_x[i - 1] + spo_rand_x[i - 2];
+    for (i = 2; i < 55; ++i)
+        spo_rand_x[i] = spo_rand_x[i - 1] + spo_rand_x[i - 2];
 
-	spo_rand_i = 23;
-	spo_rand_j = 54;
+    spo_rand_i = 23;
+    spo_rand_j = 54;
 
-	for (i = 255; i >= 0; --i)
+    for (i = 255; i >= 0; --i)
         spo_internal_rand();
-	for (i = 255; i >= 0; --i)
+    for (i = 255; i >= 0; --i)
         spo_rand_y[i] = spo_internal_rand();
 
-	spo_rand_z = spo_internal_rand();
+    spo_rand_z = spo_internal_rand();
 }
 
 uint32_t spo_random_next()
 {
     uint32_t index = spo_rand_z >> 24;
 
-	spo_rand_z = spo_rand_y[index];
-	spo_rand_y[index] = spo_internal_rand();
+    spo_rand_z = spo_rand_y[index];
+    spo_rand_y[index] = spo_internal_rand();
 
-	return spo_rand_z;
+    return spo_rand_z;
 }
