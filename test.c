@@ -1,10 +1,27 @@
 #include <stdio.h>
-#include <Windows.h>
 #include "rudp.h"
 #include "time.h"
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <time.h>
+#endif
+
 #define SPO_TEST_CLIENT
 #define SPO_ITERATIONS_BEFORE_SLEEP 50
+
+static void sleep(uint32_t msecs)
+{
+#ifdef WIN32
+    Sleep(msecs);
+#else
+    struct timespec ts;
+    ts.tv_sec = msecs / 1000;
+    ts.tv_nsec = (msecs % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#endif
+}
 
 void incoming_data(spo_host_t host, spo_connection_t connection, uint32_t data_size)
 {
@@ -121,9 +138,24 @@ int main(int argc, char **argv)
 
 #ifdef SPO_TEST_CLIENT
     host = spo_new_host(&bind_addr1, &configuration, &callbacks);
+    if (host == NULL)
+    {
+        printf("can't create a new host!\n");
+        return 1;
+    }
     conn = spo_new_connection(host, &bind_addr2);
+    if (conn == NULL)
+    {
+        printf("can't create a new connection!\n");
+        return 1;
+    }
 #else
     host = spo_new_host(&bind_addr2, &configuration, &callbacks);
+    if (host == NULL)
+    {
+        printf("can't create a new host!\n");
+        return 1;
+    }
 #endif
 
     while (1)
@@ -132,7 +164,7 @@ int main(int argc, char **argv)
             idle_count = 0;
         else if (++idle_count > SPO_ITERATIONS_BEFORE_SLEEP)
         {
-            Sleep(2);
+            sleep(2);
             idle_count = 0;
         }
 
