@@ -96,17 +96,17 @@ int main(int argc, char **argv)
     spo_set_logger(logger);
 
     bind_addr1.type = SPO_NET_SOCKET_TYPE_IPV4;
-    bind_addr1.address[0] = 192;
-    bind_addr1.address[1] = 168;
-    bind_addr1.address[2] = 1;
-    bind_addr1.address[3] = 153;
+    bind_addr1.address[0] = 127;
+    bind_addr1.address[1] = 0;
+    bind_addr1.address[2] = 0;
+    bind_addr1.address[3] = 1;
     bind_addr1.port = 5000;
 
     bind_addr2.type = SPO_NET_SOCKET_TYPE_IPV4;
-    bind_addr2.address[0] = 192;
-    bind_addr2.address[1] = 168;
-    bind_addr2.address[2] = 1;
-    bind_addr2.address[3] = 153;
+    bind_addr2.address[0] = 127;
+    bind_addr2.address[1] = 0;
+    bind_addr2.address[2] = 0;
+    bind_addr2.address[3] = 1;
     bind_addr2.port = 6000;
 
     callbacks.connected = connected;
