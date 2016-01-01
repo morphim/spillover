@@ -40,7 +40,7 @@ void incoming_data(spo_host_t host, spo_connection_t connection, uint32_t data_s
         if (time_elapsed > 0)
         {
             double speed = (double)bytes_received / time_elapsed * 1000;
-            printf("===================== Average speed: %f bytes / sec\n", speed);
+            printf("===================== Average speed: %.0f bytes / sec\n", speed);
         }
         start_time = spo_time_current();
         bytes_received = 0;
