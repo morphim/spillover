@@ -32,6 +32,7 @@ THE SOFTWARE.
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 
