@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include "index.h"
 
 #define SPO_INDEX_ALLOCATION_INCREMENT 10

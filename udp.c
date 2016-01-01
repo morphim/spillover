@@ -31,6 +31,8 @@ THE SOFTWARE.
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <netinet/in.h>
 
 #define SPO_NET_SOCKET_TYPE int
 #define SPO_NET_CLOSE_SOCKET(socket) close(socket)
