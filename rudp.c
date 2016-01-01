@@ -1429,12 +1429,6 @@ static void spo_internal_process_packet(spo_host_data_t *host,
     SPO_LOG("incoming packet (SEQ %u, ACK %u, acks %hu, %u bytes)",
         seq, ack, acks_count, packet_size - SPO_HEADER_SIZE(acks_count));
 
-    if (spo_random_next() % 100 < 5)
-    {
-        SPO_LOG("LOST!");
-        return;
-    }
-
     if (dst_port == 0) /* incoming connection */
     {
         spo_internal_process_incoming_connection_packet(host, src_address, src_port, seq);
