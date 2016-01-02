@@ -80,23 +80,25 @@ spo_index_item_t *spo_index_insert_item_after(spo_index_t *index, spo_index_item
     if (index->size == index->length)
     {
         uint32_t new_size = index->size + SPO_INDEX_ALLOCATION_INCREMENT;
+        spo_index_item_t *new_items = (spo_index_item_t *)realloc(index->items, new_size * sizeof(spo_index_item_t));
 
-        new_item = (spo_index_item_t *)realloc(index->items, new_size * sizeof(spo_index_item_t));
-        if (new_item == NULL)
+        if (new_items == NULL)
             return NULL;
 
-        index->items = new_item;
+        if (after_item == NULL)
+            new_item = new_items; /* insert as head */
+        else
+            new_item = new_items + (after_item - index->items) + 1; /* insert regular item */
+
+        index->items = new_items;
         index->size = new_size;
-    }
-    if (after_item == NULL)
-    {
-        /* insert as head */
-        new_item = index->items;
     }
     else
     {
-        /* insert regular item */
-        new_item = after_item + 1;
+        if (after_item == NULL)
+            new_item = index->items; /* insert as head */
+        else
+            new_item = after_item + 1; /* insert regular item */
     }
 
     memmove(new_item + 1, new_item, (index->length - (new_item - index->items)) * sizeof(spo_index_item_t));
