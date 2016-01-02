@@ -450,8 +450,12 @@ static void spo_internal_handle_sent_data_acknowledged(spo_connection_data_t *co
         else
         {
             /* congestion avoidance */
-            spo_internal_increase_cwnd_by_bytes(connection,
-                SPO_MAX_PAYLOAD_SIZE * SPO_MAX_PAYLOAD_SIZE / connection->snd_cwnd_bytes);
+            uint32_t max_payload_squared = SPO_MAX_PAYLOAD_SIZE * SPO_MAX_PAYLOAD_SIZE;
+            if (connection->snd_cwnd_bytes < max_payload_squared)
+                spo_internal_increase_cwnd_by_bytes(connection, max_payload_squared / connection->snd_cwnd_bytes);
+            else
+                spo_internal_increase_cwnd_by_bytes(connection, 1); /* at least 1 byte */
+
             SPO_LOG("CONGESTION AVOIDANCE, increase CWND to %u", connection->snd_cwnd_bytes);
         }
     }
