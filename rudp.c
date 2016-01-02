@@ -797,11 +797,12 @@ static uint32_t spo_internal_send_data(spo_connection_data_t *connection, const 
 
             if (buf_size_required > connection->snd_buf_size)
             {
-                connection->snd_buf = (uint8_t *)realloc(connection->snd_buf, buf_size_required);
-                if (connection->snd_buf == NULL)
+                uint8_t *new_buffer = (uint8_t *)realloc(connection->snd_buf, buf_size_required);
+                if (new_buffer == NULL)
                     return 0; /* can't allocate enough space */
 
                 connection->snd_buf_size = buf_size_required;
+                connection->snd_buf = new_buffer;
             }
 
             memcpy(connection->snd_buf + connection->snd_buf_bytes, data, bytes_to_send);
