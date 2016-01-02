@@ -57,7 +57,7 @@ typedef struct
     uint32_t initial_cwnd_in_packets; /* 2 is recommended */
     uint32_t cwnd_on_timeout_in_packets; /* 2 is recommended */
     uint32_t min_ssthresh_in_packets; /* 4 is recommended */
-    uint32_t max_cwnd_inc_on_slowstart_in_packets; /* 2 is recommended */
+    uint32_t max_cwnd_inc_on_slowstart_in_packets; /* 50 is recommended */
     uint32_t duplicate_acks_for_retransmit; /* 2 is recommended */
     uint32_t ssthresh_factor_on_timeout_percent; /* 50 is recommended */
     uint32_t ssthresh_factor_on_loss_percent; /* 70 is recommended */

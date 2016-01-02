@@ -9,7 +9,8 @@
 #endif
 
 #define SPO_TEST_CLIENT
-#define SPO_ITERATIONS_BEFORE_SLEEP 50
+#define SPO_RWND_SIZE (200 * 1024)
+#define SPO_ITERATIONS_BEFORE_SLEEP 500
 
 static void sleep(uint32_t msecs)
 {
@@ -25,7 +26,7 @@ static void sleep(uint32_t msecs)
 
 void incoming_data(spo_host_t host, spo_connection_t connection, uint32_t data_size)
 {
-    static uint8_t buf[65536];
+    static uint8_t buf[SPO_RWND_SIZE];
     static int32_t count = 0;
     static uint32_t start_time = 0;
     static uint32_t bytes_received = 0;
@@ -118,16 +119,16 @@ int main(int argc, char **argv)
     configuration.initial_cwnd_in_packets = 2;
     configuration.cwnd_on_timeout_in_packets = 2;
     configuration.min_ssthresh_in_packets = 4;
-    configuration.max_cwnd_inc_on_slowstart_in_packets = 2;
+    configuration.max_cwnd_inc_on_slowstart_in_packets = 50;
     configuration.duplicate_acks_for_retransmit = 2;
     configuration.ssthresh_factor_on_timeout_percent = 50;
     configuration.ssthresh_factor_on_loss_percent = 70;
 
-    configuration.connection_buf_size = 65536;
+    configuration.connection_buf_size = SPO_RWND_SIZE;
     configuration.socket_buf_size = 1048576 * 4;
     configuration.max_connections = 500;
     configuration.connection_timeout = 8000;
-    configuration.ping_interval = 1000;
+    configuration.ping_interval = 1500;
     configuration.connect_retransmission_timeout = 2000;
     configuration.max_connect_attempts = 3;
     configuration.accept_retransmission_timeout = 1000;
