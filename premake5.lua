@@ -32,8 +32,11 @@ project "spillover-tests"
     language "C"
     targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
     includedirs { "./include" }
-    links { "spillover" }
     files { "**.h", "test/**.c" }
+    links { "spillover" }
+
+    configurations { "windows" }
+        links { "Ws2_32.lib" }
 
     filter "configurations:Debug"
         defines { "DEBUG" }
