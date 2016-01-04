@@ -2,7 +2,7 @@
 #include "rudp.h"
 #include "time.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <time.h>
@@ -14,7 +14,7 @@
 
 static void sleep(uint32_t msecs)
 {
-#ifdef WIN32
+#ifdef _WIN32
     Sleep(msecs);
 #else
     struct timespec ts;

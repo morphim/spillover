@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 #include "time.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <time.h>
@@ -32,7 +32,7 @@ THE SOFTWARE.
 
 uint32_t spo_time_current()
 {
-#ifdef WIN32
+#ifdef _WIN32
     return (uint32_t)GetTickCount();
 #else
     struct timespec ts;
@@ -44,7 +44,7 @@ uint32_t spo_time_current()
 
 uint32_t spo_time_elapsed(uint32_t from_time)
 {
-#ifdef WIN32
+#ifdef _WIN32
     return ((uint32_t)GetTickCount() - from_time); /* unsigned arithmetic does all the magic */
 #else
     struct timespec ts;

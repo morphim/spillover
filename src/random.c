@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <time.h>
@@ -37,7 +37,7 @@ static uint32_t spo_rand_j;
 
 static uint32_t spo_internal_get_seed()
 {
-#ifdef WIN32
+#ifdef _WIN32
     LARGE_INTEGER time;
     QueryPerformanceCounter(&time);
     return time.LowPart;

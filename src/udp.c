@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include <string.h>
 #include "udp.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <ws2tcpip.h>
 
 #define SPO_NET_SOCKET_TYPE SOCKET
@@ -59,7 +59,7 @@ typedef struct
 
 static spo_bool_t spo_internal_set_socket_blocking_mode(SPO_NET_SOCKET_TYPE socket, spo_bool_t block)
 {
-#ifdef WIN32
+#ifdef _WIN32
     u_long mode = !block;
     if (ioctlsocket(socket, FIONBIO, &mode) == SOCKET_ERROR)
         return SPO_FALSE;
@@ -158,7 +158,7 @@ spo_bool_t spo_net_equal_addresses(const spo_net_address_t *first, const spo_net
 
 spo_bool_t spo_net_init()
 {
-#ifdef WIN32
+#ifdef _WIN32
     WSADATA wsa_data;
     if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0)
         return SPO_FALSE;
@@ -168,7 +168,7 @@ spo_bool_t spo_net_init()
 
 void spo_net_shutdown()
 {
-#ifdef WIN32
+#ifdef _WIN32
     WSACleanup();
 #endif
 }
