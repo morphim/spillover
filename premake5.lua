@@ -3,9 +3,22 @@ newoption {
     description = 'Enable big-endian byte order support (default is little-endian)'
 }
 
+newoption {
+    trigger     = 'enable-ipv6',
+    description = 'Enable IPv6 protocol support (disbled by default)'
+}
+
 solution "spillover"
     configurations { "Debug", "Release" }
     platforms { "x64", "x32" }
+
+    if _OPTIONS['enable-big-endian'] then
+        defines { "SPO_BIGENDIAN_PLATFORM" }
+    end
+
+    if _OPTIONS['enable-ipv6'] then
+        defines { "SPO_IPV6_SUPPORT" }
+    end
 
 project "spillover"
     kind "StaticLib"
@@ -40,11 +53,8 @@ project "spillover-tests"
 
     filter "configurations:Debug"
         defines { "DEBUG" }
+        flags { "Symbols" }
 
-        flags { 
-            "Symbols",
-        }
-
-      filter "configurations:Release"
-            defines { "NDEBUG" }
-            optimize "On"
+    filter "configurations:Release"
+        defines { "NDEBUG" }
+        optimize "On"
