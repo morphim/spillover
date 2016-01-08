@@ -5,7 +5,7 @@ newoption {
 
 newoption {
     trigger     = 'enable-ipv6',
-    description = 'Enable IPv6 protocol support (disbled by default)'
+    description = 'Enable IPv6 protocol support (disabled by default)'
 }
 
 solution "spillover"
