@@ -52,7 +52,7 @@ project "spillover-tests"
         links { "Ws2_32.lib" }
 
     filter "configurations:Debug"
-        defines { "DEBUG" }
+        defines { "_DEBUG" }
         flags { "Symbols" }
 
     filter "configurations:Release"
