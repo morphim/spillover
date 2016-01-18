@@ -731,8 +731,8 @@ SPO_INLINE spo_bool_t spo_internal_send_reset_packet(spo_host_data_t *host,
 
     packet_header->type = SPO_PACKET_RESET;
     packet_header->sacks = 0;
-    packet_header->src_port = src_port;
-    packet_header->dst_port = dst_port;
+    packet_header->src_port = spo_internal_swap_2bytes(src_port);
+    packet_header->dst_port = spo_internal_swap_2bytes(dst_port);
     packet_header->seq = spo_internal_swap_4bytes(seq);
     packet_header->ack = spo_internal_swap_4bytes(ack);
 
