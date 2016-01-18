@@ -27,4 +27,10 @@ typedef unsigned int spo_bool_t;
 #define SPO_TRUE 1
 #define SPO_FALSE 0
 
+#ifdef _MSC_VER
+#define SPO_INLINE static __inline
+#else
+#define SPO_INLINE static inline
+#endif
+
 #endif

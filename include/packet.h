@@ -27,14 +27,28 @@ THE SOFTWARE.
 
 #define SPO_PACKET_MAX_SACKS 8
 
+/* packet type */
+typedef enum
+{
+    SPO_PACKET_CONNECT,
+    SPO_PACKET_ACCEPT,
+    SPO_PACKET_RESET,
+    SPO_PACKET_ACK, /* ack only */
+    SPO_PACKET_PING, /* ping */
+    SPO_PACKET_DATA, /* contains data */
+
+    SPO_PACKET_TYPES_COUNT
+} spo_packet_type_t;
+
 typedef struct
 {
+    uint8_t type; /* packet type */
+    uint8_t sacks;
+    uint16_t reserved;
     uint16_t src_port;
     uint16_t dst_port;
-    uint32_t seq;
-    uint32_t ack;
-    uint16_t flags; /* reserved */
-    uint16_t sacks;
+    uint32_t seq; /* SEQ and packet payload are info from the sender */
+    uint32_t ack; /* ACK and SACKs are info from the receiver */
 } spo_packet_header_t;
 
 typedef struct

@@ -37,7 +37,9 @@ typedef enum
     SPO_CONNECTION_STATE_CONNECT_RECEIVED_WHILE_STARTED, /* rendezvous connections */
     SPO_CONNECTION_STATE_CONNECT_RECEIVED, /* incoming connections */
     SPO_CONNECTION_STATE_CONNECTED, /* established connections */
-    SPO_CONNECTION_STATE_CLOSED /* terminated connections */
+    SPO_CONNECTION_STATE_CLOSED, /* terminated connections */
+
+    SPO_CONNECTION_STATES_COUNT
 } spo_connection_state_t;
 
 typedef struct
