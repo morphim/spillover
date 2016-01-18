@@ -57,7 +57,7 @@ typedef struct
     SPO_NET_SOCKET_TYPE handle;
 } spo_net_socket_data_t;
 
-static spo_bool_t spo_internal_set_socket_blocking_mode(SPO_NET_SOCKET_TYPE socket, spo_bool_t block)
+SPO_INLINE spo_bool_t spo_internal_set_socket_blocking_mode(SPO_NET_SOCKET_TYPE socket, spo_bool_t block)
 {
 #ifdef _WIN32
     u_long mode = !block;
@@ -82,7 +82,7 @@ static spo_bool_t spo_internal_set_socket_blocking_mode(SPO_NET_SOCKET_TYPE sock
     return SPO_TRUE;
 }
 
-static void spo_internal_init_sys_address(struct sockaddr *dest, const spo_net_address_t *src)
+SPO_INLINE void spo_internal_init_sys_address(struct sockaddr *dest, const spo_net_address_t *src)
 {
     switch (src->type)
     {
@@ -111,7 +111,7 @@ static void spo_internal_init_sys_address(struct sockaddr *dest, const spo_net_a
     }
 }
 
-static void spo_internal_init_lib_address(spo_net_address_t *dest, const struct sockaddr *src)
+SPO_INLINE void spo_internal_init_lib_address(spo_net_address_t *dest, const struct sockaddr *src)
 {
     switch (src->sa_family)
     {

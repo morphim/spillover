@@ -111,10 +111,10 @@ struct spo_connection_data
 static logger_ptr_t spo_logger;
 static spo_bool_t spo_allowed_packets[SPO_CONNECTION_STATES_COUNT][SPO_PACKET_TYPES_COUNT];
 
-static uint32_t spo_internal_send_next_connection_data(spo_connection_data_t *connection, uint32_t cwnd_bytes);
-static uint32_t spo_internal_transmit_packet(spo_connection_data_t *connection, uint32_t seq);
+SPO_INLINE uint32_t spo_internal_send_next_connection_data(spo_connection_data_t *connection, uint32_t cwnd_bytes);
+SPO_INLINE uint32_t spo_internal_transmit_packet(spo_connection_data_t *connection, uint32_t seq);
 
-static uint16_t spo_internal_swap_2bytes(uint16_t src)
+SPO_INLINE uint16_t spo_internal_swap_2bytes(uint16_t src)
 {
 #ifdef SPO_BIGENDIAN_PLATFORM
     return src;
@@ -123,7 +123,7 @@ static uint16_t spo_internal_swap_2bytes(uint16_t src)
 #endif
 }
 
-static uint32_t spo_internal_swap_4bytes(uint32_t src)
+SPO_INLINE uint32_t spo_internal_swap_4bytes(uint32_t src)
 {
 #ifdef SPO_BIGENDIAN_PLATFORM
     return src;
@@ -137,7 +137,7 @@ static uint32_t spo_internal_swap_4bytes(uint32_t src)
 
 #ifdef _DEBUG
 
-static void spo_internal_log(const char *fmt, ...)
+SPO_INLINE void spo_internal_log(const char *fmt, ...)
 {
     char buf[1024];
     va_list list;
@@ -162,7 +162,7 @@ static void spo_internal_log(const char *fmt, ...)
 
 /* congestion control */
 
-static void spo_internal_increase_cwnd_by_bytes(spo_connection_data_t *connection, uint32_t bytes)
+SPO_INLINE void spo_internal_increase_cwnd_by_bytes(spo_connection_data_t *connection, uint32_t bytes)
 {
     connection->snd_cwnd_bytes += bytes;
 
@@ -170,7 +170,7 @@ static void spo_internal_increase_cwnd_by_bytes(spo_connection_data_t *connectio
         connection->snd_cwnd_bytes = connection->host->configuration.connection_buf_size;
 }
 
-static void spo_internal_decrease_cwnd_by_bytes(spo_connection_data_t *connection, uint32_t bytes)
+SPO_INLINE void spo_internal_decrease_cwnd_by_bytes(spo_connection_data_t *connection, uint32_t bytes)
 {
     if (connection->snd_cwnd_bytes >= bytes)
         connection->snd_cwnd_bytes -= bytes;
@@ -178,7 +178,7 @@ static void spo_internal_decrease_cwnd_by_bytes(spo_connection_data_t *connectio
         connection->snd_cwnd_bytes = 0;
 }
 
-static void spo_internal_handle_connection_init(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_handle_connection_init(spo_connection_data_t *connection)
 {
     connection->snd_last_data_sent_time = spo_time_current();
     connection->snd_cwnd_bytes = SPO_MAX_PAYLOAD_SIZE * connection->host->configuration.initial_cwnd_in_packets;
@@ -189,14 +189,14 @@ static void spo_internal_handle_connection_init(spo_connection_data_t *connectio
 }
 
 /* for each sent packet */
-static void spo_internal_handle_next_data_sent(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_handle_next_data_sent(spo_connection_data_t *connection)
 {
     /* reset retransmission timer */
     connection->snd_last_data_sent_time = spo_time_current();
 }
 
 /* for each received packet */
-static void spo_internal_handle_new_data_received(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_handle_new_data_received(spo_connection_data_t *connection)
 {
     if (connection->snd_mandatory_packets < connection->host->configuration.max_consecutive_acknowledges)
     {
@@ -216,7 +216,7 @@ static void spo_internal_handle_new_data_received(spo_connection_data_t *connect
 }
 
 /* for each received packet */
-static void spo_internal_handle_unknown_ack(spo_connection_data_t *connection, uint32_t ack)
+SPO_INLINE void spo_internal_handle_unknown_ack(spo_connection_data_t *connection, uint32_t ack)
 {
     /* check for duplicate ack */
     /* ack is considered a duplicate when the sender has
@@ -240,7 +240,7 @@ static void spo_internal_handle_unknown_ack(spo_connection_data_t *connection, u
     }
 }
 
-static uint32_t spo_internal_recovery_retransmit_by_seq(spo_connection_data_t *connection, uint32_t seq)
+SPO_INLINE uint32_t spo_internal_recovery_retransmit_by_seq(spo_connection_data_t *connection, uint32_t seq)
 {
     /* don't retransmit if congestion window isn't big enough */
     if (connection->snd_cwnd_bytes >= SPO_MAX_PAYLOAD_SIZE)
@@ -262,7 +262,7 @@ static uint32_t spo_internal_recovery_retransmit_by_seq(spo_connection_data_t *c
     return 0;
 }
 
-static uint32_t spo_internal_recovery_retransmit_next_data(spo_connection_data_t *connection)
+SPO_INLINE uint32_t spo_internal_recovery_retransmit_next_data(spo_connection_data_t *connection)
 {
     spo_index_item_t *send_after_item;
     uint32_t seq;
@@ -297,7 +297,7 @@ static uint32_t spo_internal_recovery_retransmit_next_data(spo_connection_data_t
     return 0;
 }
 
-static uint32_t spo_internal_recovery_send_next_data(spo_connection_data_t *connection)
+SPO_INLINE uint32_t spo_internal_recovery_send_next_data(spo_connection_data_t *connection)
 {
     /* send next data if congestion window allows this */
     if (connection->snd_cwnd_bytes >= SPO_MAX_PAYLOAD_SIZE)
@@ -315,7 +315,7 @@ static uint32_t spo_internal_recovery_send_next_data(spo_connection_data_t *conn
     return 0;
 }
 
-static void spo_internal_update_ssthresh(spo_connection_data_t *connection, uint32_t ssthresh_factor_percent)
+SPO_INLINE void spo_internal_update_ssthresh(spo_connection_data_t *connection, uint32_t ssthresh_factor_percent)
 {
     uint32_t bytes_not_acked = connection->snd_next_seq - connection->snd_start_seq;
     uint32_t ssthresh_in_bytes = bytes_not_acked * ssthresh_factor_percent / 100;
@@ -325,7 +325,7 @@ static void spo_internal_update_ssthresh(spo_connection_data_t *connection, uint
         connection->host->configuration.min_ssthresh_in_packets * SPO_MAX_PAYLOAD_SIZE);
 }
 
-static spo_bool_t spo_internal_initiate_recovery_mode(spo_connection_data_t *connection, spo_recovery_mode_t mode)
+SPO_INLINE spo_bool_t spo_internal_initiate_recovery_mode(spo_connection_data_t *connection, spo_recovery_mode_t mode)
 {
     switch (mode)
     {
@@ -365,7 +365,7 @@ static spo_bool_t spo_internal_initiate_recovery_mode(spo_connection_data_t *con
     return spo_internal_recovery_send_next_data(connection) > 0;
 }
 
-static void spo_internal_terminate_recovery_mode(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_terminate_recovery_mode(spo_connection_data_t *connection)
 {
     switch (connection->snd_recovery_mode)
     {
@@ -385,7 +385,7 @@ static void spo_internal_terminate_recovery_mode(spo_connection_data_t *connecti
     connection->snd_recovery_mode = SPO_RECOVERY_OFF;
 }
 
-static spo_bool_t spo_internal_initiate_slowstart_by_timeout(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_initiate_slowstart_by_timeout(spo_connection_data_t *connection)
 {
     if (connection->snd_recovery_mode == SPO_RECOVERY_OFF)
         spo_internal_update_ssthresh(connection, connection->host->configuration.ssthresh_factor_on_timeout_percent);
@@ -411,7 +411,7 @@ static spo_bool_t spo_internal_initiate_slowstart_by_timeout(spo_connection_data
 }
 
 /* for each received packet */
-static void spo_internal_handle_sent_data_acknowledged(spo_connection_data_t *connection, uint32_t bytes_sent)
+SPO_INLINE void spo_internal_handle_sent_data_acknowledged(spo_connection_data_t *connection, uint32_t bytes_sent)
 {
     if (connection->snd_recovery_mode != SPO_RECOVERY_OFF)
     {
@@ -469,7 +469,7 @@ static void spo_internal_handle_sent_data_acknowledged(spo_connection_data_t *co
     connection->snd_last_data_sent_time = spo_time_current();
 }
 
-static spo_bool_t spo_internal_recovery_data_transmission(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_recovery_data_transmission(spo_connection_data_t *connection)
 {
     /* first, try to retransmit next lost data */
     if (spo_internal_recovery_retransmit_next_data(connection) > 0)
@@ -502,7 +502,7 @@ static spo_bool_t spo_internal_recovery_data_transmission(spo_connection_data_t 
     return spo_internal_recovery_send_next_data(connection) > 0;
 }
 
-static spo_bool_t spo_internal_data_transmission(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_data_transmission(spo_connection_data_t *connection)
 {
     if (connection->snd_duplicate_acks >= connection->host->configuration.duplicate_acks_for_retransmit)
     {
@@ -526,7 +526,7 @@ static spo_bool_t spo_internal_data_transmission(spo_connection_data_t *connecti
     return spo_internal_send_next_connection_data(connection, connection->snd_cwnd_bytes) > 0;
 }
 
-static spo_bool_t spo_internal_process_retransmission_timer(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_process_retransmission_timer(spo_connection_data_t *connection)
 {
     if (spo_time_elapsed(connection->snd_last_data_sent_time) >= connection->host->configuration.data_retransmission_timeout)
     {
@@ -553,7 +553,7 @@ static spo_bool_t spo_internal_process_retransmission_timer(spo_connection_data_
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_handle_data_transmission(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_handle_data_transmission(spo_connection_data_t *connection)
 {
     /* we are trying to send only one packet per call */
 
@@ -577,31 +577,31 @@ static spo_bool_t spo_internal_handle_data_transmission(spo_connection_data_t *c
 
 /* events */
 
-static void spo_internal_fire_connected_event(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_fire_connected_event(spo_connection_data_t *connection)
 {
     if (connection->host->callbacks.connected != NULL)
         connection->host->callbacks.connected(connection->host, connection);
 }
 
-static void spo_internal_fire_unable_to_connect_event(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_fire_unable_to_connect_event(spo_connection_data_t *connection)
 {
     if (connection->host->callbacks.unable_to_connect != NULL)
         connection->host->callbacks.unable_to_connect(connection->host, connection);
 }
 
-static void spo_internal_fire_incoming_connection_event(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_fire_incoming_connection_event(spo_connection_data_t *connection)
 {
     if (connection->host->callbacks.incoming_connection != NULL)
         connection->host->callbacks.incoming_connection(connection->host, connection);
 }
 
-static void spo_internal_fire_connection_lost_event(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_fire_connection_lost_event(spo_connection_data_t *connection)
 {
     if (connection->host->callbacks.connection_lost != NULL)
         connection->host->callbacks.connection_lost(connection->host, connection);
 }
 
-static void spo_internal_fire_incoming_data_event(spo_connection_data_t *connection, uint32_t data_size)
+SPO_INLINE void spo_internal_fire_incoming_data_event(spo_connection_data_t *connection, uint32_t data_size)
 {
     if (connection->host->callbacks.incoming_data != NULL)
         connection->host->callbacks.incoming_data(connection->host, connection, data_size);
@@ -609,7 +609,7 @@ static void spo_internal_fire_incoming_data_event(spo_connection_data_t *connect
 
 /* connection search */
 
-static spo_connection_data_t *spo_internal_find_started_connection(spo_host_data_t *host, const spo_net_address_t *remote_address)
+SPO_INLINE spo_connection_data_t *spo_internal_find_started_connection(spo_host_data_t *host, const spo_net_address_t *remote_address)
 {
     spo_connection_data_t *connection;
     spo_list_item_t *current = SPO_LIST_FIRST(&host->started_connections);
@@ -627,7 +627,7 @@ static spo_connection_data_t *spo_internal_find_started_connection(spo_host_data
     return NULL;
 }
 
-static spo_connection_data_t *spo_internal_find_active_connection(spo_host_data_t *host,
+SPO_INLINE spo_connection_data_t *spo_internal_find_active_connection(spo_host_data_t *host,
     const spo_net_address_t *remote_address, uint16_t remote_port)
 {
     spo_connection_data_t *connection;
@@ -646,7 +646,7 @@ static spo_connection_data_t *spo_internal_find_active_connection(spo_host_data_
     return NULL;
 }
 
-static spo_connection_data_t *spo_internal_find_oldest_incoming_connection(spo_host_data_t *host)
+SPO_INLINE spo_connection_data_t *spo_internal_find_oldest_incoming_connection(spo_host_data_t *host)
 {
     spo_connection_data_t *connection;
     spo_connection_data_t *oldest = NULL;
@@ -669,7 +669,7 @@ static spo_connection_data_t *spo_internal_find_oldest_incoming_connection(spo_h
 
 /* data transmission over the network */
 
-static void spo_internal_pack_acks(uint8_t *data, const spo_packet_desc_t *acks_list, unsigned acks_count)
+SPO_INLINE void spo_internal_pack_acks(uint8_t *data, const spo_packet_desc_t *acks_list, unsigned acks_count)
 {
     spo_packet_header_sack_t *ack;
     unsigned count = 0;
@@ -685,7 +685,7 @@ static void spo_internal_pack_acks(uint8_t *data, const spo_packet_desc_t *acks_
     }
 }
 
-static void spo_internal_unpack_acks(spo_packet_desc_t *acks_list, const uint8_t *data, uint32_t data_size, unsigned max_acks)
+SPO_INLINE void spo_internal_unpack_acks(spo_packet_desc_t *acks_list, const uint8_t *data, uint32_t data_size, unsigned max_acks)
 {
     spo_packet_header_sack_t *ack;
     unsigned count = 0;
@@ -703,7 +703,7 @@ static void spo_internal_unpack_acks(spo_packet_desc_t *acks_list, const uint8_t
     }
 }
 
-static unsigned spo_internal_get_acks(spo_packet_desc_t *acks_list, spo_connection_data_t *connection)
+SPO_INLINE unsigned spo_internal_get_acks(spo_packet_desc_t *acks_list, spo_connection_data_t *connection)
 {
     spo_packet_desc_t *packet;
     unsigned count = 0;
@@ -723,7 +723,7 @@ static unsigned spo_internal_get_acks(spo_packet_desc_t *acks_list, spo_connecti
     return count;
 }
 
-static spo_bool_t spo_internal_send_reset_packet(spo_host_data_t *host,
+SPO_INLINE spo_bool_t spo_internal_send_reset_packet(spo_host_data_t *host,
     const spo_net_address_t *dst_address, uint16_t src_port, uint16_t dst_port, uint32_t seq, uint32_t ack)
 {
     uint8_t packet_data[SPO_NET_MAX_PACKET_SIZE];
@@ -739,7 +739,7 @@ static spo_bool_t spo_internal_send_reset_packet(spo_host_data_t *host,
     return spo_net_send(host->socket, packet_data, SPO_HEADER_SIZE(0), dst_address) >= SPO_HEADER_SIZE(0);
 }
 
-static uint32_t spo_internal_send_packet(spo_connection_data_t *connection,
+SPO_INLINE uint32_t spo_internal_send_packet(spo_connection_data_t *connection,
     spo_packet_type_t packet_type, uint32_t seq, const uint8_t *data, uint32_t data_size)
 {
     uint8_t packet_data[SPO_NET_MAX_PACKET_SIZE];
@@ -785,7 +785,7 @@ static uint32_t spo_internal_send_packet(spo_connection_data_t *connection,
     return 0;
 }
 
-static uint32_t spo_internal_send_data_packets(spo_connection_data_t *connection,
+SPO_INLINE uint32_t spo_internal_send_data_packets(spo_connection_data_t *connection,
     uint32_t start_seq, uint32_t max_packets, const uint8_t *data, uint32_t data_size)
 {
     uint32_t bytes_sent;
@@ -805,7 +805,7 @@ static uint32_t spo_internal_send_data_packets(spo_connection_data_t *connection
     return total_bytes_sent;
 }
 
-static uint32_t spo_internal_send_data(spo_connection_data_t *connection, const uint8_t *data, uint32_t data_size)
+SPO_INLINE uint32_t spo_internal_send_data(spo_connection_data_t *connection, const uint8_t *data, uint32_t data_size)
 {
     /* don't allow sending data over the unestablished connection */
     if (connection->state == SPO_CONNECTION_STATE_CONNECTED)
@@ -836,7 +836,7 @@ static uint32_t spo_internal_send_data(spo_connection_data_t *connection, const 
     return 0;
 }
 
-static uint32_t spo_internal_read_data(spo_connection_data_t *connection, uint8_t *buf, uint32_t buf_size)
+SPO_INLINE uint32_t spo_internal_read_data(spo_connection_data_t *connection, uint8_t *buf, uint32_t buf_size)
 {
     /* don't allow reading data from the unestablished connection */
     if (connection->state == SPO_CONNECTION_STATE_CONNECTED)
@@ -861,7 +861,7 @@ static uint32_t spo_internal_read_data(spo_connection_data_t *connection, uint8_
 
 /* connections management */
 
-static uint16_t spo_internal_get_port_from_pool(spo_host_data_t *host)
+SPO_INLINE uint16_t spo_internal_get_port_from_pool(spo_host_data_t *host)
 {
     uint16_t port;
     uint16_t ports_available[UINT16_MAX];
@@ -879,7 +879,7 @@ static uint16_t spo_internal_get_port_from_pool(spo_host_data_t *host)
     return ports_available[spo_random_next() % ports_count];
 }
 
-static spo_bool_t spo_internal_allocate_connection_buffers(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_allocate_connection_buffers(spo_connection_data_t *connection)
 {
     connection->rcv_buf = (uint8_t *)malloc(connection->host->configuration.connection_buf_size);
     if (connection->rcv_buf == NULL)
@@ -890,7 +890,7 @@ static spo_bool_t spo_internal_allocate_connection_buffers(spo_connection_data_t
     return SPO_TRUE;
 }
 
-static void spo_internal_destroy_connection(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_destroy_connection(spo_connection_data_t *connection)
 {
     spo_index_item_t *current;
 
@@ -926,7 +926,7 @@ static void spo_internal_destroy_connection(spo_connection_data_t *connection)
     }
 }
 
-static void spo_internal_terminate_connection(spo_connection_data_t *connection)
+SPO_INLINE void spo_internal_terminate_connection(spo_connection_data_t *connection)
 {
     spo_connection_state_t state = connection->state;
 
@@ -969,7 +969,7 @@ static void spo_internal_terminate_connection(spo_connection_data_t *connection)
     }
 }
 
-static void spo_internal_init_connection(spo_connection_data_t *connection, spo_host_data_t *host, uint16_t port)
+SPO_INLINE void spo_internal_init_connection(spo_connection_data_t *connection, spo_host_data_t *host, uint16_t port)
 {
     memset(connection, 0, sizeof(spo_connection_data_t));
     connection->host = host;
@@ -984,7 +984,7 @@ static void spo_internal_init_connection(spo_connection_data_t *connection, spo_
     host->connections_by_ports[port] = connection;
 }
 
-static spo_connection_data_t *spo_internal_reuse_oldest_connection(spo_host_data_t *host)
+SPO_INLINE spo_connection_data_t *spo_internal_reuse_oldest_connection(spo_host_data_t *host)
 {
     spo_connection_data_t *connection = spo_internal_find_oldest_incoming_connection(host);
     if (connection == NULL)
@@ -996,7 +996,7 @@ static spo_connection_data_t *spo_internal_reuse_oldest_connection(spo_host_data
     return connection;
 }
 
-static spo_connection_data_t *spo_internal_allocate_connection(spo_host_data_t *host)
+SPO_INLINE spo_connection_data_t *spo_internal_allocate_connection(spo_host_data_t *host)
 {
     spo_connection_data_t *connection;
     uint16_t port;
@@ -1031,7 +1031,7 @@ static spo_connection_data_t *spo_internal_allocate_connection(spo_host_data_t *
 
 /* network packets processing */
 
-static spo_index_item_t *spo_internal_insert_packet_desc(spo_index_t *list,
+SPO_INLINE spo_index_item_t *spo_internal_insert_packet_desc(spo_index_t *list,
     spo_index_item_t *after_item, const spo_packet_desc_t *packet_desc)
 {
     spo_index_item_t *new_item;
@@ -1052,7 +1052,7 @@ static spo_index_item_t *spo_internal_insert_packet_desc(spo_index_t *list,
     return new_item;
 }
 
-static spo_bool_t spo_internal_merge_packet_desc(spo_index_t *list, const spo_packet_desc_t *packet)
+SPO_INLINE spo_bool_t spo_internal_merge_packet_desc(spo_index_t *list, const spo_packet_desc_t *packet)
 {
     uint32_t current_start;
     uint32_t current_end;
@@ -1139,7 +1139,7 @@ static spo_bool_t spo_internal_merge_packet_desc(spo_index_t *list, const spo_pa
     return SPO_TRUE;
 }
 
-static spo_bool_t spo_internal_check_seq(spo_connection_data_t *connection, uint32_t seq)
+SPO_INLINE spo_bool_t spo_internal_check_seq(spo_connection_data_t *connection, uint32_t seq)
 {
     /* check if SEQ is in the valid range */
     uint32_t min_seq = connection->rcv_start_seq;
@@ -1153,7 +1153,7 @@ static spo_bool_t spo_internal_check_seq(spo_connection_data_t *connection, uint
     return SPO_TRUE;
 }
 
-static spo_bool_t spo_internal_check_ack(spo_connection_data_t *connection, uint32_t ack)
+SPO_INLINE spo_bool_t spo_internal_check_ack(spo_connection_data_t *connection, uint32_t ack)
 {
     /* check if ACK is in the valid range */
     /* we should check previous SEQ numbers to correctly process out-of-order packets */
@@ -1168,7 +1168,7 @@ static spo_bool_t spo_internal_check_ack(spo_connection_data_t *connection, uint
     return SPO_TRUE;
 }
 
-static spo_bool_t spo_internal_fill_rcv_buffer(spo_connection_data_t *connection, uint32_t seq, const uint8_t *data, uint32_t data_size)
+SPO_INLINE spo_bool_t spo_internal_fill_rcv_buffer(spo_connection_data_t *connection, uint32_t seq, const uint8_t *data, uint32_t data_size)
 {
     uint32_t common_start_seq;
     uint32_t common_end_seq;
@@ -1215,7 +1215,7 @@ static spo_bool_t spo_internal_fill_rcv_buffer(spo_connection_data_t *connection
     return SPO_FALSE;
 }
 
-static uint32_t spo_internal_remove_acknowledged_packets(spo_connection_data_t *connection, uint32_t ack)
+SPO_INLINE uint32_t spo_internal_remove_acknowledged_packets(spo_connection_data_t *connection, uint32_t ack)
 {
     uint32_t bytes_sent;
 
@@ -1240,7 +1240,7 @@ static uint32_t spo_internal_remove_acknowledged_packets(spo_connection_data_t *
     return 0;
 }
 
-static void spo_internal_process_started_connection_packet(spo_connection_data_t *connection,
+SPO_INLINE void spo_internal_process_started_connection_packet(spo_connection_data_t *connection,
     spo_packet_type_t packet_type, uint16_t src_port, uint32_t seq, uint32_t ack)
 {
     if (ack != connection->snd_start_seq)
@@ -1271,7 +1271,7 @@ static void spo_internal_process_started_connection_packet(spo_connection_data_t
     spo_internal_fire_connected_event(connection);
 }
 
-static void spo_internal_process_rendezvous_connection_packet(spo_connection_data_t *connection, uint16_t src_port, uint32_t seq)
+SPO_INLINE void spo_internal_process_rendezvous_connection_packet(spo_connection_data_t *connection, uint16_t src_port, uint32_t seq)
 {
     SPO_LOG("CONNECT received while in STARTED state");
 
@@ -1286,7 +1286,7 @@ static void spo_internal_process_rendezvous_connection_packet(spo_connection_dat
     /* init the connection after confirming packet */
 }
 
-static void spo_internal_process_incoming_connection_initial_packet(spo_host_data_t *host,
+SPO_INLINE void spo_internal_process_incoming_connection_initial_packet(spo_host_data_t *host,
     const spo_net_address_t *src_address, uint16_t src_port, uint32_t seq)
 {
     spo_connection_data_t *connection = spo_internal_allocate_connection(host);
@@ -1309,7 +1309,7 @@ static void spo_internal_process_incoming_connection_initial_packet(spo_host_dat
     connection->rcv_last_packet_time = spo_time_current();
 }
 
-static void spo_internal_process_incoming_connection_confirming_packet(spo_connection_data_t *connection,
+SPO_INLINE void spo_internal_process_incoming_connection_confirming_packet(spo_connection_data_t *connection,
     spo_packet_type_t packet_type, uint16_t src_port, uint32_t seq, uint32_t ack, const uint8_t *data, uint32_t data_size)
 {
     if (src_port != connection->remote_port)
@@ -1361,7 +1361,7 @@ static void spo_internal_process_incoming_connection_confirming_packet(spo_conne
     }
 }
 
-static void spo_internal_process_incoming_connection_packet(spo_host_data_t *host,
+SPO_INLINE void spo_internal_process_incoming_connection_packet(spo_host_data_t *host,
     const spo_net_address_t *src_address, uint16_t src_port, uint32_t seq)
 {
     spo_connection_data_t *connection = spo_internal_find_active_connection(host, src_address, src_port);
@@ -1380,7 +1380,7 @@ static void spo_internal_process_incoming_connection_packet(spo_host_data_t *hos
         spo_internal_process_incoming_connection_initial_packet(host, src_address, src_port, seq);
 }
 
-static void spo_internal_process_acks_list(spo_connection_data_t *connection, const spo_packet_desc_t *acks_list, unsigned acks_count)
+SPO_INLINE void spo_internal_process_acks_list(spo_connection_data_t *connection, const spo_packet_desc_t *acks_list, unsigned acks_count)
 {
     spo_packet_desc_t packet_desc;
     uint32_t start_seq;
@@ -1408,7 +1408,7 @@ static void spo_internal_process_acks_list(spo_connection_data_t *connection, co
     }
 }
 
-static void spo_internal_remove_old_acks(spo_connection_data_t *connection, uint32_t ack)
+SPO_INLINE void spo_internal_remove_old_acks(spo_connection_data_t *connection, uint32_t ack)
 {
     spo_packet_desc_t *packet_desc;
     spo_index_item_t *current = SPO_INDEX_FIRST(&connection->snd_acked_packets);
@@ -1435,7 +1435,7 @@ static void spo_internal_remove_old_acks(spo_connection_data_t *connection, uint
     }
 }
 
-static void spo_internal_process_established_connection_packet(spo_connection_data_t *connection,
+SPO_INLINE void spo_internal_process_established_connection_packet(spo_connection_data_t *connection,
     spo_packet_type_t packet_type, uint16_t src_port, uint32_t seq, uint32_t ack,
     const spo_packet_desc_t *acks_list, unsigned acks_count,
     const uint8_t *data, uint32_t data_size)
@@ -1488,7 +1488,7 @@ static void spo_internal_process_established_connection_packet(spo_connection_da
     }
 }
 
-static void spo_internal_process_packet(spo_host_data_t *host,
+SPO_INLINE void spo_internal_process_packet(spo_host_data_t *host,
     const spo_net_address_t *src_address, const uint8_t *packet_data, uint32_t packet_size)
 {
     spo_packet_desc_t acks_list[SPO_PACKET_MAX_SACKS];
@@ -1571,7 +1571,7 @@ static void spo_internal_process_packet(spo_host_data_t *host,
     }
 }
 
-static spo_bool_t spo_internal_check_received_data(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_check_received_data(spo_connection_data_t *connection)
 {
     spo_packet_desc_t *packet_desc;
     uint32_t packet_end;
@@ -1610,7 +1610,7 @@ static spo_bool_t spo_internal_check_received_data(spo_connection_data_t *connec
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_check_connection_timeout(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_check_connection_timeout(spo_connection_data_t *connection)
 {
     if (spo_time_elapsed(connection->rcv_last_packet_time) >= connection->host->configuration.connection_timeout)
     {
@@ -1621,7 +1621,7 @@ static spo_bool_t spo_internal_check_connection_timeout(spo_connection_data_t *c
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_send_ping_packet(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_send_ping_packet(spo_connection_data_t *connection)
 {
     if (spo_time_elapsed(connection->snd_last_packet_time) >= connection->host->configuration.ping_interval)
     {
@@ -1633,7 +1633,7 @@ static spo_bool_t spo_internal_send_ping_packet(spo_connection_data_t *connectio
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_send_fast_ack(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_send_fast_ack(spo_connection_data_t *connection)
 {
     if (connection->snd_mandatory_packets > 0)
     {
@@ -1645,7 +1645,7 @@ static spo_bool_t spo_internal_send_fast_ack(spo_connection_data_t *connection)
     return SPO_FALSE;
 }
 
-static uint32_t spo_internal_send_next_connection_data(spo_connection_data_t *connection, uint32_t cwnd_bytes)
+SPO_INLINE uint32_t spo_internal_send_next_connection_data(spo_connection_data_t *connection, uint32_t cwnd_bytes)
 {
     uint32_t bytes_sent_already = connection->snd_next_seq - connection->snd_start_seq;
     uint32_t max_bytes_limit = SPO_MIN(connection->snd_buf_bytes, cwnd_bytes);
@@ -1672,7 +1672,7 @@ static uint32_t spo_internal_send_next_connection_data(spo_connection_data_t *co
     return 0;
 }
 
-static uint32_t spo_internal_transmit_packet(spo_connection_data_t *connection, uint32_t seq)
+SPO_INLINE uint32_t spo_internal_transmit_packet(spo_connection_data_t *connection, uint32_t seq)
 {
     uint32_t pos_in_buf = seq - connection->snd_start_seq;
 
@@ -1695,7 +1695,7 @@ static uint32_t spo_internal_transmit_packet(spo_connection_data_t *connection, 
     return 0;
 }
 
-static spo_bool_t spo_internal_process_established_connection(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_process_established_connection(spo_connection_data_t *connection)
 {
     /* can't transmit data if send buffer is empty */
     if (connection->snd_buf_bytes > 0 && spo_internal_handle_data_transmission(connection))
@@ -1712,7 +1712,7 @@ static spo_bool_t spo_internal_process_established_connection(spo_connection_dat
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_process_started_connection(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_process_started_connection(spo_connection_data_t *connection)
 {
     if (spo_time_elapsed(connection->snd_last_packet_time) >= connection->host->configuration.connect_retransmission_timeout)
     {
@@ -1734,7 +1734,7 @@ static spo_bool_t spo_internal_process_started_connection(spo_connection_data_t 
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_process_incoming_connection(spo_connection_data_t *connection)
+SPO_INLINE spo_bool_t spo_internal_process_incoming_connection(spo_connection_data_t *connection)
 {
     if (spo_time_elapsed(connection->snd_last_packet_time) >= connection->host->configuration.accept_retransmission_timeout)
     {
@@ -1756,7 +1756,7 @@ static spo_bool_t spo_internal_process_incoming_connection(spo_connection_data_t
     return SPO_FALSE;
 }
 
-static spo_bool_t spo_internal_process_connections(spo_host_data_t *host)
+SPO_INLINE spo_bool_t spo_internal_process_connections(spo_host_data_t *host)
 {
     spo_bool_t state_changed = SPO_FALSE;
     spo_connection_data_t *connection;
@@ -1801,7 +1801,7 @@ static spo_bool_t spo_internal_process_connections(spo_host_data_t *host)
     return state_changed;
 }
 
-static spo_bool_t spo_internal_receive_packets(spo_host_data_t *host)
+SPO_INLINE spo_bool_t spo_internal_receive_packets(spo_host_data_t *host)
 {
     uint8_t packet_data[SPO_NET_MAX_PACKET_SIZE];
     spo_net_address_t address;
@@ -1823,7 +1823,7 @@ static spo_bool_t spo_internal_receive_packets(spo_host_data_t *host)
     return data_received;
 }
 
-static spo_connection_data_t *spo_internal_start_connection(spo_host_data_t *host, const spo_net_address_t *remote_address)
+SPO_INLINE spo_connection_data_t *spo_internal_start_connection(spo_host_data_t *host, const spo_net_address_t *remote_address)
 {
     spo_connection_data_t *connection = spo_internal_allocate_connection(host);
     if (connection == NULL)

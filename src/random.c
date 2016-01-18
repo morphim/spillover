@@ -27,6 +27,7 @@ THE SOFTWARE.
 #endif
 
 #include "random.h"
+#include "common.h"
 
 /* we don't use synchronization here as this results in more random numbers */
 static uint32_t spo_rand_x[55];
@@ -35,7 +36,7 @@ static uint32_t spo_rand_z;
 static uint32_t spo_rand_i;
 static uint32_t spo_rand_j;
 
-static uint32_t spo_internal_get_seed()
+SPO_INLINE uint32_t spo_internal_get_seed()
 {
 #ifdef _WIN32
     LARGE_INTEGER time;
@@ -49,7 +50,7 @@ static uint32_t spo_internal_get_seed()
 #endif
 }
 
-static uint32_t spo_internal_rand()
+SPO_INLINE uint32_t spo_internal_rand()
 {
     if (spo_rand_i > 0)
         --spo_rand_i;
