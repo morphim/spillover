@@ -1142,7 +1142,8 @@ SPO_INLINE spo_bool_t spo_internal_merge_packet_desc(spo_index_t *list, const sp
 SPO_INLINE spo_bool_t spo_internal_check_seq(spo_connection_data_t *connection, uint32_t seq)
 {
     /* check if SEQ is in the valid range */
-    uint32_t min_seq = connection->rcv_start_seq;
+    /* we should check previous SEQ numbers as the other side could send old SEQ before the new ACK is received */
+    uint32_t min_seq = connection->rcv_start_seq - connection->host->configuration.connection_buf_size;
     uint32_t max_seq = connection->rcv_start_seq + connection->host->configuration.connection_buf_size - 1;
 
     if (SPO_WRAPPED_LESS(seq, min_seq))
